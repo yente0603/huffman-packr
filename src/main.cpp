@@ -8,15 +8,21 @@
 
 void printHelp(const std::string &progName)
 {
-    std::cout << "Usage:\n"
-              << "  " << progName << " -c [input_file]                      # Compress \n"
-              << "  " << progName << " -d [output_file]                     # Decompress\n"
-              << "  " << progName << " -c [input_file] -o [output_file]     # Compress to assigned path\n"
-              << "  " << progName << " -d [input_file] -o [output_file]     # Decompress to assigned path\n"
-              << "  " << progName << " -r                                   # Show compression ratio\n"
-              << "  " << progName << " -h                                   # Show this help\n";
-}
+    std::cout << "Usage:\n";
+    std::cout << "  " << progName << " -c <input_file> [-o <output_file>] # Compress a file\n";
+    std::cout << "  " << progName << " -d <input_file> [-o <output_file>] # Decompress a file\n";
+    std::cout << "  " << progName << " -r                                 # Show compression ratio\n";
+    std::cout << "  " << progName << " -h                                 # Show this help message\n";
 
+    std::cout << "\nOptions:\n";
+    std::cout << "  -c <input_file>     Compress the specified input file.\n";
+    std::cout << "  -d <input_file>     Decompress the specified input file.\n";
+    std::cout << "  -o <output_file>    Specify the output file path. If not provided, a default name and location are used.\n";
+    std::cout << "  -r                  Show the compression ratio.\n";
+    std::cout << "  -h                  Show this help message.\n";
+
+    std::cout << std::endl;
+}
 int main(int argc, char **argv)
 {
     if (argc < 2)
@@ -31,10 +37,23 @@ int main(int argc, char **argv)
         printHelp(argv[0]);
     else if (option == "-c")
     {
-        if (argc == 3)
-            huffman::YOUR_INPUT_PATH = argv[2];
-        if (argc == 5)
+        if (argc < 3)
+        {
+            std::cerr << "Error: Input file required for compression (-c).\n";
+            printHelp(argv[0]);
+            return 1;
+        }
+        huffman::YOUR_INPUT_PATH = argv[2];
+
+        if (argc == 5 && std::string(argv[3]) == "-o")
             huffman::YOUR_INPUT_COMPRESSED_PATH = argv[4];
+        if (argc > 5)
+        {
+            std::cerr << "Error: Too many arguments for compression.\n";
+            printHelp(argv[0]);
+            return 1;
+        }
+
         huffman::initializeTree();
         huffman::writeFrequencyTable();
         huffman::compressFile();
@@ -43,19 +62,24 @@ int main(int argc, char **argv)
     }
     else if (option == "-d")
     {
-        if (argc == 3)
-            huffman::YOUR_INPUT_DECOMPRESSED_PATH = argv[2];
-        if (argc == 5)
+        if (argc < 3)
         {
-            huffman::YOUR_INPUT_COMPRESSED_PATH = argv[2];
-            huffman::YOUR_INPUT_DECOMPRESSED_PATH = argv[4];
+            std::cerr << "Error: Input compressed file required for decompression (-d).\n";
+            printHelp(argv[0]);
+            return 1;
         }
-        huffman::decompressFile();
+        huffman::YOUR_INPUT_PATH = argv[2];
 
-        if (argc == 3 || argc == 5)
-            std::cout << "Your decompress path: " << huffman::YOUR_INPUT_DECOMPRESSED_PATH << std::endl;
-        else
-            std::cout << "Default decompress path: " << huffman::DEFAULT_DECOMPRESSED_PATH << std::endl;
+        if (argc == 5 && std::string(argv[3]) == "-o")
+            huffman::YOUR_INPUT_DECOMPRESSED_PATH = argv[4];
+        if (argc > 5)
+        {
+            std::cerr << "Error: Too many arguments for decompression.\n";
+            printHelp(argv[0]);
+            return 1;
+        }
+
+        huffman::decompressFile();
     }
     else if (option == "-r")
         std::cout << huffman::getRatio() << std::endl;
