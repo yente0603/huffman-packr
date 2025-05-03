@@ -126,18 +126,55 @@ namespace huffman
     {
         readFrequencyTable();
 
-        std::ifstream inputFile(YOUR_INPUT_COMPRESSED_PATH, std::ios::binary);
         std::ifstream zeroPaddingFile(DEFAULT_ZEROPADDING_PATH);
+        int zeroPadding = 0;
+        if (!zeroPaddingFile)
+        {
+            std::cerr << "Unable to open file: " << DEFAULT_ZEROPADDING_PATH << std::endl;
+            std::exit(EXIT_FAILURE);
+        }
+        else
+        {
+            zeroPaddingFile >> zeroPadding;
+            zeroPaddingFile.close();
+        }
+
+        if (YOUR_INPUT_DECOMPRESSED_PATH == "")
+        {
+            std::string baseName = getBaseName();
+            if (baseName.empty())
+            {
+                std::cerr << "Error: Failed to retrieve original basename." << std::endl;
+                std::exit(EXIT_FAILURE);
+            }
+            try
+            {
+                std::filesystem::path p = (std::filesystem::path("output") / baseName);
+                YOUR_INPUT_DECOMPRESSED_PATH = p.string();
+                YOUR_INPUT_DECOMPRESSED_PATH += getExten();
+            }
+            catch (const std::filesystem::filesystem_error &e)
+            {
+                std::cerr << "Filesystem error during default path generation: " << e.what() << std::endl;
+                std::exit(EXIT_FAILURE); // 文件系統錯誤是致命的
+            }
+            catch (const std::exception &e)
+            {
+                std::cerr << "An error occurred during default path generation: " << e.what() << std::endl;
+                std::exit(EXIT_FAILURE);
+            }
+        }
+        else
+        {
+            // YOUR_INPUT_DECOMPRESSED_PATH has been assigned
+        }
+
+        std::ifstream inputFile(YOUR_INPUT_PATH, std::ios::binary);
         std::ofstream outputFile(YOUR_INPUT_DECOMPRESSED_PATH, std::ios::out | std::ios::binary);
 
         if (!inputFile)
         {
-            std::cerr << "Unable to open file: " << YOUR_INPUT_COMPRESSED_PATH << std::endl;
-            std::exit(EXIT_FAILURE);
-        }
-        if (!zeroPaddingFile)
-        {
-            std::cerr << "Unable to open file: " << DEFAULT_ZEROPADDING_PATH << std::endl;
+            std::cerr << "Unable to open file: " << YOUR_INPUT_PATH << std::endl;
             std::exit(EXIT_FAILURE);
         }
         if (!outputFile)
@@ -145,10 +182,6 @@ namespace huffman
             std::cerr << "Unable to create file: " << YOUR_INPUT_DECOMPRESSED_PATH << std::endl;
             std::exit(EXIT_FAILURE);
         }
-
-        int zeroPadding = 0;
-        zeroPaddingFile >> zeroPadding;
-        zeroPaddingFile.close();
 
         // Get total size of file
         inputFile.seekg(0, std::ios::end);
@@ -183,6 +216,7 @@ namespace huffman
 
         inputFile.close();
         outputFile.close();
-        std::cout << "Decompress Done." << std::endl;
+        std::cout << "Decompress Done." << std::endl
+                  << "Decompress Path: " << YOUR_INPUT_DECOMPRESSED_PATH << std::endl;
     }
 }
