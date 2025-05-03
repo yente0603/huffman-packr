@@ -18,7 +18,6 @@ namespace huffman
 {
     void compressFile()
     {
-        // 檢查 YOUR_INPUT_COMPRESSED_PATH 是否仍然是其預設初始值 DEFAULT_COMPRESSED_PATH
         if (YOUR_INPUT_COMPRESSED_PATH == "")
         {
             try
@@ -29,7 +28,7 @@ namespace huffman
             catch (const std::filesystem::filesystem_error &e)
             {
                 std::cerr << "Filesystem error during default path generation: " << e.what() << std::endl;
-                std::exit(EXIT_FAILURE); // 文件系統錯誤是致命的
+                std::exit(EXIT_FAILURE);
             }
             catch (const std::exception &e)
             {
