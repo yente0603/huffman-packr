@@ -7,10 +7,41 @@
 #include <fstream>
 #include <string>
 #include <bitset>
+
+#if __cplusplus >= 201703L
+#include <filesystem> // C++17 filesystem
+#else
+#include <algorithm> // For std::max in C++11 path helpers
+#endif
+
 namespace huffman
 {
     void compressFile()
     {
+        // 檢查 YOUR_INPUT_COMPRESSED_PATH 是否仍然是其預設初始值 DEFAULT_COMPRESSED_PATH
+        if (YOUR_INPUT_COMPRESSED_PATH == "")
+        {
+            try
+            {
+                std::filesystem::path p = std::filesystem::path("output") / (std::filesystem::path(YOUR_INPUT_PATH).stem().string() + ".huff");
+                YOUR_INPUT_COMPRESSED_PATH = p.string();
+            }
+            catch (const std::filesystem::filesystem_error &e)
+            {
+                std::cerr << "Filesystem error during default path generation: " << e.what() << std::endl;
+                std::exit(EXIT_FAILURE); // 文件系統錯誤是致命的
+            }
+            catch (const std::exception &e)
+            {
+                std::cerr << "An error occurred during default path generation: " << e.what() << std::endl;
+                std::exit(EXIT_FAILURE);
+            }
+        }
+        else
+        {
+            // YOUR_INPUT_COMPRESSED_PATH has been assigned
+        }
+
         std::ifstream inputFile(YOUR_INPUT_PATH, std::ios::binary);
         std::ofstream outputFile(YOUR_INPUT_COMPRESSED_PATH, std::ios::binary);
 
