@@ -79,6 +79,43 @@ namespace huffman
         file.close();
         return extenName;
     }
+    void writeBaseName()
+    {
+        std::ofstream file(DEFAULT_BASENAME_PATH, std::ios::out);
+        if (!file)
+        {
+            std::cerr << "Unable to open file: " << DEFAULT_BASENAME_PATH << std::endl;
+            std::exit(EXIT_FAILURE);
+        }
+
+#if __cplusplus >= 201703L
+        std::filesystem::path p(YOUR_INPUT_PATH);
+        file << p.stem().string();
+#else
+        size_t lastSlash = YOUR_INPUT_PATH.find_last_of("/\\");
+        std::string fileName = (lastSlash == std::string::npos) ? YOUR_INPUT_PATH : YOUR_INPUT_PATH.substr(lastSlash + 1);
+        size_t pos = fileName.find_last_of('.');
+        if (pos != std::string::npos)
+            file << fileName.substr(0, pos);
+        else
+            file << fileName; // File has no extension
+#endif
+        file.close();
+    }
+    std::string getBaseName()
+    {
+        std::ifstream file(DEFAULT_BASENAME_PATH, std::ios::in);
+        if (!file)
+        {
+            std::cerr << "Unable to open file: " << DEFAULT_BASENAME_PATH << std::endl;
+            std::exit(EXIT_FAILURE);
+        }
+
+        std::string baseName;
+        file >> baseName; // Read the base name string
+        file.close();
+        return baseName;
+    }
     long long getFileSize(const std::string &fileName)
     {
         std::ifstream file(fileName, std::ios::binary | std::ios::ate);
