@@ -1,0 +1,4 @@
+.vscode/
+.testdata/
+.DS_Store/
+bin/main.elf
