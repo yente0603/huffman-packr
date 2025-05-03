@@ -155,7 +155,7 @@ namespace huffman
             catch (const std::filesystem::filesystem_error &e)
             {
                 std::cerr << "Filesystem error during default path generation: " << e.what() << std::endl;
-                std::exit(EXIT_FAILURE); // 文件系統錯誤是致命的
+                std::exit(EXIT_FAILURE);
             }
             catch (const std::exception &e)
             {
