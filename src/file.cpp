@@ -56,6 +56,9 @@ namespace huffman
             std::exit(EXIT_FAILURE);
         }
 
+        writeExten();
+        writeBaseName();
+
         if (freqTable.empty())
         {
             std::cerr << "Input file was empty. Creating empty compressed file and zero padding log." << std::endl;
@@ -69,9 +72,6 @@ namespace huffman
             }
             file << 0; // 0 padding for empty file
             file.close();
-
-            // Write extension file (might be empty ext)
-            writeExten();
 
             inputFile.close();
             outputFile.close();
@@ -118,9 +118,8 @@ namespace huffman
         file << zeroPadding;
         file.close();
 
-        writeExten();
         std::cout << "Compress Done." << std::endl
-                  << "Default compress path: " << YOUR_INPUT_COMPRESSED_PATH << std::endl;
+                  << "Compress Path: " << YOUR_INPUT_COMPRESSED_PATH << std::endl;
     }
 
     void decompressFile()
