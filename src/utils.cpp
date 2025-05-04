@@ -75,7 +75,7 @@ namespace huffman
         }
 
         std::string extenName;
-        file >> extenName;
+        getline(file, extenName); // Read the rest of the line to clear the buffer
         file.close();
         return extenName;
     }
@@ -112,7 +112,7 @@ namespace huffman
         }
 
         std::string baseName;
-        file >> baseName; // Read the base name string
+        getline(file, baseName); // Read the rest of the line to clear the buffer
         file.close();
         return baseName;
     }
