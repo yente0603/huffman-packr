@@ -18,6 +18,9 @@ namespace huffman
 {
     void compressFile()
     {
+        initializeTree();
+        writeFrequencyTable();
+
         if (YOUR_INPUT_COMPRESSED_PATH == "")
         {
             try
@@ -116,6 +119,8 @@ namespace huffman
         }
         file << zeroPadding;
         file.close();
+
+        writeRatio();
 
         std::cout << "Compress Done." << std::endl
                   << "Compress Path: " << YOUR_INPUT_COMPRESSED_PATH << std::endl;

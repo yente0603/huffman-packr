@@ -54,10 +54,7 @@ int main(int argc, char **argv)
             return 1;
         }
 
-        huffman::initializeTree();
-        huffman::writeFrequencyTable();
         huffman::compressFile();
-        huffman::writeRatio();
         std::cout << huffman::getRatio() << std::endl;
     }
     else if (option == "-d")
