@@ -5,6 +5,7 @@
 #include "../include/config.hpp"
 #include "../include/utils.hpp"
 #include "../include/table.hpp"
+#include "../include/utils.hpp"
 
 void printHelp(const std::string &progName)
 {
