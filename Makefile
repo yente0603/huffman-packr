@@ -28,7 +28,7 @@ bin:
 obj:
 	mkdir -p obj
 output:
-	mkdir -p output
+	mkdir -p output output/tmp
 
 clean:
 	rm -rf output/* obj/*.o bin/${TARGET}
