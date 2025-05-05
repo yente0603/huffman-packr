@@ -204,12 +204,7 @@ namespace huffman
             std::string baseName = getBaseName();
             std::string exten = getExten();
             if (baseName.empty())
-            {
-                if (baseName.empty() && std::filesystem::file_size(DEFAULT_BASENAME_PATH) == 0)
-                    throw std::runtime_error(std::string("Failed to retrieve original basename (basename file is empty or corrupt): ") + DEFAULT_BASENAME_PATH);
-                if (baseName.empty())
-                    throw std::runtime_error(std::string("Failed to retrieve original basename (unexpected empty result from getBaseName)."));
-            }
+                throw std::runtime_error(std::string("Failed to retrieve original basename."));
             try
             {
 #if __cplusplus >= 201703L

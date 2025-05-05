@@ -8,6 +8,8 @@
 #include <cstdlib>
 #include <string>
 #include <stdexcept>
+#include <string>
+#include <iomanip> // std::fixed, std::setprecision
 
 #if __cplusplus >= 201703L
 #include <filesystem>
@@ -117,10 +119,7 @@ namespace huffman
 
         // Check if tellg failed (often returns -1 on failure)
         if (fileSizePos == std::streampos(-1))
-        {
-            std::cerr << "Error getting file size for: " << fileName << std::endl;
-            std::exit(EXIT_FAILURE); // Exit if unable to get size
-        }
+            throw std::ios_base::failure(std::string("Unable to open file to get size: ") + fileName);
 
         // Convert std::streampos to long long.
         // This cast is safe as long as the streampos value fits within long long,
