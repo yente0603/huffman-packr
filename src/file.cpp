@@ -64,9 +64,6 @@ namespace huffman
         if (!outputFile)
             throw std::ios_base::failure(std::string("Unable to create output file for compression: ") + YOUR_INPUT_COMPRESSED_PATH);
 
-        writeExten();
-        writeBaseName();
-
         if (freqTable.empty())
         {
             std::cerr << "Input file was empty. Creating empty compressed file and zero padding log." << std::endl;

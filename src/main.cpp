@@ -115,6 +115,8 @@ int main(int argc, char **argv)
 
         if (cmd == "-c")
         {
+            huffman::writeBaseName();
+            huffman::writeExten();
             huffman::compressFile();
             std::cout << "Compress Done." << std::endl
                       << "Default compress path: " << huffman::YOUR_INPUT_COMPRESSED_PATH << std::endl;
