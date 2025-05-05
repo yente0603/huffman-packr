@@ -8,6 +8,7 @@
 #include <iomanip>
 #include <cstdlib>
 #include <filesystem>
+#include <stdexcept>
 
 namespace huffman
 {
@@ -18,10 +19,7 @@ namespace huffman
 
         std::ifstream file(YOUR_INPUT_PATH, std::ios::binary);
         if (!file)
-        {
-            std::cerr << "Unable to open file: " << YOUR_INPUT_PATH << std::endl;
-            std::exit(EXIT_FAILURE);
-        }
+            throw std::ios_base::failure(std::string("Unable to open input file for frequency calculation: ") + YOUR_INPUT_PATH);
 
         int byte;
         while ((byte = file.get()) != EOF)
@@ -46,10 +44,8 @@ namespace huffman
     {
         std::ofstream file(DEFAULT_EXTEN_PATH, std::ios::out);
         if (!file)
-        {
-            std::cerr << "Unable to open file: " << DEFAULT_EXTEN_PATH << std::endl;
-            std::exit(EXIT_FAILURE);
-        }
+            throw std::ios_base::failure(std::string("Unable to open extension log file for writing: ") + DEFAULT_EXTEN_PATH);
+
         // Use std::filesystem for more robust path handling (requires C++17)
         // If using older C++, you'll need manual string manipulation.
 #if __cplusplus >= 201703L
@@ -69,10 +65,7 @@ namespace huffman
     {
         std::ifstream file(DEFAULT_EXTEN_PATH, std::ios::in);
         if (!file)
-        {
-            std::cerr << "Unable to open file: " << DEFAULT_EXTEN_PATH << std::endl;
-            std::exit(EXIT_FAILURE);
-        }
+            throw std::ios_base::failure(std::string("Unable to open extension log file for reading: ") + DEFAULT_EXTEN_PATH);
 
         std::string extenName;
         getline(file, extenName); // Read the rest of the line to clear the buffer
@@ -83,10 +76,7 @@ namespace huffman
     {
         std::ofstream file(DEFAULT_BASENAME_PATH, std::ios::out);
         if (!file)
-        {
-            std::cerr << "Unable to open file: " << DEFAULT_BASENAME_PATH << std::endl;
-            std::exit(EXIT_FAILURE);
-        }
+            throw std::ios_base::failure(std::string("Unable to open basename log file for writing: ") + DEFAULT_BASENAME_PATH);
 
 #if __cplusplus >= 201703L
         std::filesystem::path p(YOUR_INPUT_PATH);
@@ -106,10 +96,7 @@ namespace huffman
     {
         std::ifstream file(DEFAULT_BASENAME_PATH, std::ios::in);
         if (!file)
-        {
-            std::cerr << "Unable to open file: " << DEFAULT_BASENAME_PATH << std::endl;
-            std::exit(EXIT_FAILURE);
-        }
+            throw std::ios_base::failure(std::string("Unable to open basename log file for reading: ") + DEFAULT_BASENAME_PATH);
 
         std::string baseName;
         getline(file, baseName); // Read the rest of the line to clear the buffer
@@ -120,10 +107,7 @@ namespace huffman
     {
         std::ifstream file(fileName, std::ios::binary | std::ios::ate);
         if (!file)
-        {
-            std::cerr << "Unable to open file: " << fileName << std::endl;
-            std::exit(EXIT_FAILURE);
-        }
+            throw std::ios_base::failure(std::string("Unable to open file to get size: ") + fileName);
 
         std::streampos fileSizePos = file.tellg();
         file.close();
@@ -147,10 +131,7 @@ namespace huffman
     {
         std::ofstream file(DEFAULT_RATIO_PATH, std::ios::out);
         if (!file)
-        {
-            std::cerr << "Unable to open file: " << DEFAULT_RATIO_PATH << std::endl;
-            std::exit(EXIT_FAILURE);
-        }
+            throw std::ios_base::failure(std::string("Unable to open ratio log file for writing: ") + DEFAULT_RATIO_PATH);
 
         long long originalFileSize = getFileSize(YOUR_INPUT_PATH),
                   compressedFileSize = getFileSize(YOUR_INPUT_COMPRESSED_PATH);
@@ -170,10 +151,7 @@ namespace huffman
     {
         std::ifstream file(DEFAULT_RATIO_PATH, std::ios::in);
         if (!file)
-        {
-            std::cerr << "Unable to open file: " << DEFAULT_RATIO_PATH << std::endl;
-            std::exit(EXIT_FAILURE);
-        }
+            throw std::runtime_error(std::string("Unable to open ratio log file. Has compression been performed yet? File: ") + DEFAULT_RATIO_PATH);
 
         std::string line;
         while (std::getline(file, line))
@@ -183,6 +161,6 @@ namespace huffman
                 return line;
             }
         }
-        return "Compression Ratio: N/A";
+        throw std::runtime_error(std::string("Compression ratio not found in log file: ") + DEFAULT_RATIO_PATH);
     }
 }

@@ -8,6 +8,7 @@
 #include <fstream>
 #include <map>
 #include <string>
+#include <stdexcept>
 
 namespace huffman
 {
@@ -36,10 +37,8 @@ namespace huffman
     {
         std::ofstream file(DEFAULT_FREQ_TABLE_PATH, std::ios::out);
         if (!file)
-        {
-            std::cerr << "Unable to open file: " << DEFAULT_FREQ_TABLE_PATH << std::endl;
-            std::exit(EXIT_FAILURE);
-        }
+            throw std::ios_base::failure(std::string("Unable to open frequency table file for writing: ") + DEFAULT_FREQ_TABLE_PATH);
+
         if (freqTable.empty())
             std::cerr << "Warning: freqTable is empty. Writing empty frequency file." << std::endl;
 
@@ -52,10 +51,7 @@ namespace huffman
     {
         std::ifstream file(DEFAULT_FREQ_TABLE_PATH, std::ios::in);
         if (!file)
-        {
-            std::cerr << "Unable to open frequency table: " << DEFAULT_FREQ_TABLE_PATH << std::endl;
-            std::exit(EXIT_FAILURE);
-        }
+            throw std::ios_base::failure(std::string("Unable to open frequency table file for reading: ") + DEFAULT_FREQ_TABLE_PATH);
 
         reverseFreqTable.clear();
 

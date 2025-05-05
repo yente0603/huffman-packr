@@ -7,12 +7,8 @@
 #include <fstream>
 #include <string>
 #include <bitset>
-
-#if __cplusplus >= 201703L
-#include <filesystem> // C++17 filesystem
-#else
-#include <algorithm> // For std::max in C++11 path helpers
-#endif
+#include <stdexcept>
+#include <filesystem>
 
 namespace huffman
 {
@@ -30,13 +26,13 @@ namespace huffman
             }
             catch (const std::filesystem::filesystem_error &e)
             {
-                std::cerr << "Filesystem error during default path generation: " << e.what() << std::endl;
-                std::exit(EXIT_FAILURE);
+                // std::cerr << "Filesystem error during default path generation: " << e.what() << std::endl;
+                throw std::runtime_error(std::string("Filesystem error during default path generation: ") + e.what());
             }
             catch (const std::exception &e)
             {
-                std::cerr << "An error occurred during default path generation: " << e.what() << std::endl;
-                std::exit(EXIT_FAILURE);
+                // std::cerr << "An error occurred during default path generation: " << e.what() << std::endl;
+                throw std::runtime_error(std::string("An error occurred during default path generation: ") + e.what());
             }
         }
         else
@@ -48,15 +44,10 @@ namespace huffman
         std::ofstream outputFile(YOUR_INPUT_COMPRESSED_PATH, std::ios::binary);
 
         if (!inputFile)
-        {
-            std::cerr << "Unable to open file: " << YOUR_INPUT_PATH << std::endl;
-            std::exit(EXIT_FAILURE);
-        }
+            throw std::ios_base::failure(std::string("Unable to open input file for compression: ") + YOUR_INPUT_PATH);
+
         if (!outputFile)
-        {
-            std::cerr << "Unable to create file: " << YOUR_INPUT_COMPRESSED_PATH << std::endl;
-            std::exit(EXIT_FAILURE);
-        }
+            throw std::ios_base::failure(std::string("Unable to create output file for compression: ") + YOUR_INPUT_COMPRESSED_PATH);
 
         writeExten();
         writeBaseName();
@@ -68,17 +59,14 @@ namespace huffman
             // Write zero padding log as 0
             std::ofstream file(DEFAULT_ZEROPADDING_PATH, std::ios::out);
             if (!file)
-            {
-                std::cerr << "Unable to open file: " << DEFAULT_ZEROPADDING_PATH << std::endl;
-                std::exit(EXIT_FAILURE);
-            }
+                throw std::ios_base::failure(std::string("Unable to open zero padding log file: ") + DEFAULT_ZEROPADDING_PATH);
+
             file << 0; // 0 padding for empty file
             file.close();
 
             inputFile.close();
             outputFile.close();
-            std::cout << "Compress Done (Empty file)." << std::endl
-                      << "Default compress path: " << YOUR_INPUT_COMPRESSED_PATH << std::endl;
+
             return;
         }
 
@@ -88,9 +76,18 @@ namespace huffman
         while ((byte = inputFile.get()) != EOF)
         {
             unsigned char ch = static_cast<unsigned char>(byte);
-            buf += freqTable[ch];
+            // Ensure the character exists in the frequency table before accessing it
+            if (freqTable.count(ch))
+                buf += freqTable[ch];
+            else
+                // This case *shouldn't* happen if initializeTree and calFreq work correctly
+                // for non-empty files, but as a safeguard:
+                throw std::runtime_error(std::string("Character with no Huffman code encountered during compression: ") + std::to_string(static_cast<int>(ch)));
+
             while (buf.size() >= 8)
             {
+                if (!outputFile.is_open())
+                    throw std::ios_base::failure(std::string("Output file stream is no longer open for writing during compression: ") + YOUR_INPUT_COMPRESSED_PATH);
                 bits = std::bitset<8>(buf.substr(0, 8)); // Get the first 8 bits
                 unsigned char byte = static_cast<unsigned char>(bits.to_ulong());
                 outputFile.write(reinterpret_cast<char *>(&byte), sizeof(byte));
@@ -113,17 +110,12 @@ namespace huffman
 
         std::ofstream file(DEFAULT_ZEROPADDING_PATH, std::ios::out);
         if (!file)
-        {
-            std::cerr << "Unable to open file: " << DEFAULT_ZEROPADDING_PATH << std::endl;
-            std::exit(EXIT_FAILURE);
-        }
+            throw std::ios_base::failure(std::string("Unable to open zero padding log file for writing: ") + DEFAULT_ZEROPADDING_PATH);
+
         file << zeroPadding;
         file.close();
 
         writeRatio();
-
-        std::cout << "Compress Done." << std::endl
-                  << "Compress Path: " << YOUR_INPUT_COMPRESSED_PATH << std::endl;
     }
 
     void decompressFile()
@@ -133,39 +125,40 @@ namespace huffman
         std::ifstream zeroPaddingFile(DEFAULT_ZEROPADDING_PATH);
         int zeroPadding = 0;
         if (!zeroPaddingFile)
-        {
-            std::cerr << "Unable to open file: " << DEFAULT_ZEROPADDING_PATH << std::endl;
-            std::exit(EXIT_FAILURE);
-        }
-        else
-        {
-            zeroPaddingFile >> zeroPadding;
-            zeroPaddingFile.close();
-        }
+            throw std::ios_base::failure(std::string("Unable to open zero padding log file for reading: ") + DEFAULT_ZEROPADDING_PATH);
+
+        zeroPaddingFile >> zeroPadding;
+        zeroPaddingFile.close();
 
         if (YOUR_INPUT_DECOMPRESSED_PATH == "")
         {
             std::string baseName = getBaseName();
+            std::string exten = getExten();
             if (baseName.empty())
             {
-                std::cerr << "Error: Failed to retrieve original basename." << std::endl;
-                std::exit(EXIT_FAILURE);
+                if (baseName.empty() && std::filesystem::file_size(DEFAULT_BASENAME_PATH) == 0)
+                    throw std::runtime_error(std::string("Failed to retrieve original basename (basename file is empty or corrupt): ") + DEFAULT_BASENAME_PATH);
+                if (baseName.empty())
+                    throw std::runtime_error(std::string("Failed to retrieve original basename (unexpected empty result from getBaseName)."));
             }
             try
             {
+#if __cplusplus >= 201703L
                 std::filesystem::path p = (std::filesystem::path("output") / baseName);
-                YOUR_INPUT_DECOMPRESSED_PATH = p.string();
-                YOUR_INPUT_DECOMPRESSED_PATH += getExten();
+                YOUR_INPUT_DECOMPRESSED_PATH = p.string() + exten;
+#else
+                YOUR_INPUT_DECOMPRESSED_PATH = "output/" + baseName + exten;
+#endif
             }
+#if __cplusplus >= 201703L
             catch (const std::filesystem::filesystem_error &e)
             {
-                std::cerr << "Filesystem error during default path generation: " << e.what() << std::endl;
-                std::exit(EXIT_FAILURE);
+                throw std::runtime_error(std::string("Filesystem error during default path generation: ") + e.what());
             }
+#endif
             catch (const std::exception &e)
             {
-                std::cerr << "An error occurred during default path generation: " << e.what() << std::endl;
-                std::exit(EXIT_FAILURE);
+                throw std::runtime_error(std::string("An error occurred during default path generation: ") + e.what());
             }
         }
         else
@@ -177,15 +170,10 @@ namespace huffman
         std::ofstream outputFile(YOUR_INPUT_DECOMPRESSED_PATH, std::ios::out | std::ios::binary);
 
         if (!inputFile)
-        {
-            std::cerr << "Unable to open file: " << YOUR_INPUT_PATH << std::endl;
-            std::exit(EXIT_FAILURE);
-        }
+            throw std::ios_base::failure(std::string("Unable to open input compressed file for decompression: ") + YOUR_INPUT_PATH);
+
         if (!outputFile)
-        {
-            std::cerr << "Unable to create file: " << YOUR_INPUT_DECOMPRESSED_PATH << std::endl;
-            std::exit(EXIT_FAILURE);
-        }
+            throw std::ios_base::failure(std::string("Unable to create output file for decompression: ") + YOUR_INPUT_DECOMPRESSED_PATH);
 
         // Get total size of file
         inputFile.seekg(0, std::ios::end);
@@ -220,7 +208,5 @@ namespace huffman
 
         inputFile.close();
         outputFile.close();
-        std::cout << "Decompress Done." << std::endl
-                  << "Decompress Path: " << YOUR_INPUT_DECOMPRESSED_PATH << std::endl;
     }
 }
