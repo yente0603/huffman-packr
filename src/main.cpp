@@ -5,7 +5,6 @@
 #include "../include/config.hpp"
 #include "../include/utils.hpp"
 #include "../include/table.hpp"
-#include "../include/utils.hpp"
 
 void printHelp(const std::string &progName)
 {
@@ -37,10 +36,6 @@ int main(int argc, char **argv)
     std::string inputPath = "";
     std::string outputPath = "";
     bool outputAssigned = false; // to flag if output path is assigned
-
-    std::string YOUR_INPUT_PATH = "";
-    std::string YOUR_INPUT_COMPRESSED_PATH = "";
-    std::string YOUR_INPUT_DECOMPRESSED_PATH = "";
 
     if (cmd == "-h")
     {
