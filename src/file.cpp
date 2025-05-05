@@ -8,7 +8,10 @@
 #include <string>
 #include <bitset>
 #include <stdexcept>
+
+#if __cplusplus >= 201703L
 #include <filesystem>
+#endif
 
 // Original bit handling using `std::bitset` in compressFile()
 // #include <bitset>
@@ -22,6 +25,7 @@ namespace huffman
 
         if (YOUR_INPUT_COMPRESSED_PATH == "")
         {
+#if __cplusplus >= 201703L
             try
             {
                 std::filesystem::path p = std::filesystem::path("output") / (std::filesystem::path(YOUR_INPUT_PATH).stem().string() + ".huff");
@@ -38,6 +42,14 @@ namespace huffman
                 throw std::runtime_error(std::string("An error occurred during default path generation: ") + e.what());
             }
         }
+#else
+            // C++11 Fallback: Manual string manipulation for path construction
+            size_t lastSlash = YOUR_INPUT_PATH.find_last_of("/\\");
+            std::string fileName = (lastSlash == std::string::npos) ? YOUR_INPUT_PATH : YOUR_INPUT_PATH.substr(lastSlash + 1);
+            size_t pos = fileName.find_last_of('.');
+            std::string stem = (pos == std::string::npos) ? fileName : fileName.substr(0, pos);
+            YOUR_INPUT_COMPRESSED_PATH = std::string("output/") + stem + ".huff";
+#endif
         else
         {
             // YOUR_INPUT_COMPRESSED_PATH has been assigned
@@ -207,7 +219,7 @@ namespace huffman
                 std::filesystem::path p = (std::filesystem::path("output") / baseName);
                 YOUR_INPUT_DECOMPRESSED_PATH = p.string() + exten;
 #else
-                YOUR_INPUT_DECOMPRESSED_PATH = "output/" + baseName + exten;
+                    YOUR_INPUT_DECOMPRESSED_PATH = "output/" + baseName + exten;
 #endif
             }
 #if __cplusplus >= 201703L

@@ -5,10 +5,13 @@
 #include <fstream>
 #include <vector>
 #include <utility>
-#include <iomanip>
 #include <cstdlib>
-#include <filesystem>
+#include <string>
 #include <stdexcept>
+
+#if __cplusplus >= 201703L
+#include <filesystem>
+#endif
 
 namespace huffman
 {
