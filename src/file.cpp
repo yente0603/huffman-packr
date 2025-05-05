@@ -10,6 +10,9 @@
 #include <stdexcept>
 #include <filesystem>
 
+// Original bit handling using `std::bitset` in compressFile()
+// #include <bitset>
+
 namespace huffman
 {
     void compressFile()
@@ -70,6 +73,23 @@ namespace huffman
             return;
         }
 
+        /* --- Original Bit Handling using std::string and std::bitset (Commented Out) ---
+         * This section of code handles reading the input file byte by byte,
+         * getting the Huffman code for each byte from freqTable,
+         * accumulating the bits in a std::string buffer 'buf',
+         * and writing out complete bytes (8 bits) to the output file
+         * using std::bitset for conversion.
+         *
+         * This approach is generally easier to understand conceptually but
+         * can be less performant for large files due to frequent string
+         * concatenations, subtractions, and bitset conversions, involving
+         * dynamic memory allocation and copying.
+         *
+         * The code below is replaced by a more direct byte and bit manipulation
+         * approach for potentially better performance.
+         */
+
+        /*
         std::bitset<8> bits;
         std::string buf;
         int byte;
@@ -104,7 +124,47 @@ namespace huffman
             unsigned char byte = static_cast<unsigned char>(bits.to_ulong());
             outputFile.write(reinterpret_cast<char *>(&byte), sizeof(byte));
         }
+        */
 
+        /*
+         * --- New, More Efficient Bit Handling ---
+         * This approach directly manipulates bytes and bits using bitwise operations.
+         * It avoids the overhead of string operations and bitset conversions for each chunk of bits.
+         * It maintains a current output byte and a count of bits already placed in it.
+         */
+        unsigned char currentByte = 0;
+        int bitsInBuffer = 0;
+
+        int byte;
+        while ((byte = inputFile.get()) != EOF)
+        {
+            unsigned char ch = static_cast<unsigned char>(byte);
+            std::string code = freqTable[ch];
+
+            for (char bitChar : code)
+            {
+                currentByte <<= 1;
+
+                if (bitChar == '1')
+                    currentByte |= 1;
+
+                bitsInBuffer++;
+
+                if (bitsInBuffer == 8)
+                {
+                    outputFile.write(reinterpret_cast<char *>(&currentByte), sizeof(currentByte));
+                    currentByte = 0, bitsInBuffer = 0;
+                }
+            }
+        }
+
+        int zeroPadding = 0;
+        if (bitsInBuffer > 0)
+        {
+            zeroPadding = 8 - bitsInBuffer;
+            currentByte <<= zeroPadding;
+            outputFile.write(reinterpret_cast<char *>(&currentByte), sizeof(currentByte));
+        }
         inputFile.close();
         outputFile.close();
 
@@ -191,6 +251,8 @@ namespace huffman
             if (bytesRead == fileSize)
             {
                 bitsToRead = 8 - zeroPadding;
+                if (bitsToRead <= 0) // after this pad are padding
+                    break;
             }
 
             for (int i = 7; i >= 8 - bitsToRead; --i)
