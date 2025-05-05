@@ -32,60 +32,107 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    std::string option = argv[1];
+    std::string cmd = argv[1];
 
-    if (option == "-h")
+    std::string inputPath = "";
+    std::string outputPath = "";
+    bool outputAssigned = false; // to flag if output path is assigned
+
+    std::string YOUR_INPUT_PATH = "";
+    std::string YOUR_INPUT_COMPRESSED_PATH = "";
+    std::string YOUR_INPUT_DECOMPRESSED_PATH = "";
+
+    if (cmd == "-h")
+    {
+        if (argc > 2)
+        {
+            std::cerr << "Error: Unexpected arguments after -h.\n";
+            printHelp(argv[0]);
+            return 1;
+        }
         printHelp(argv[0]);
-    else if (option == "-c")
+    }
+    else if (cmd == "-r")
     {
-        if (argc < 3)
+        if (argc > 2)
         {
-            std::cerr << "Error: Input file required for compression (-c).\n";
+            std::cerr << "Error: Unexpected arguments after -r.\n";
             printHelp(argv[0]);
             return 1;
         }
-        huffman::YOUR_INPUT_PATH = argv[2];
-
-        if (argc == 5 && std::string(argv[3]) == "-o")
-            huffman::YOUR_INPUT_COMPRESSED_PATH = argv[4];
-        if (argc > 5)
-        {
-            std::cerr << "Error: Too many arguments for compression.\n";
-            printHelp(argv[0]);
-            return 1;
-        }
-
-        huffman::compressFile();
         std::cout << huffman::getRatio() << std::endl;
     }
-    else if (option == "-d")
+    else if (cmd == "-c" || cmd == "-d")
     {
-        if (argc < 3)
+        for (int i = 2; i < argc; ++i)
         {
-            std::cerr << "Error: Input compressed file required for decompression (-d).\n";
+            std::string arg = argv[i];
+            if (arg == "-o")
+            {
+                if (i + 1 < argc)
+                {
+                    outputPath = argv[i + 1];
+                    outputAssigned = true;
+                    i++;
+                }
+                else
+                {
+                    // -o 是最後一個參數，沒有指定輸出文件路徑
+                    std::cerr << "Error: -o option requires an output file path.\n";
+                    printHelp(argv[0]);
+                    return 1;
+                }
+            }
+            else
+            {
+                if (inputPath.empty())
+                {
+                    inputPath = arg;
+                }
+                else
+                {
+                    std::cerr << "Error: Too many arguments or unexpected input file path: " << arg << "\n";
+                    printHelp(argv[0]);
+                    return 1;
+                }
+            }
+        }
+        if (inputPath.empty())
+        {
+            std::cerr << "Error: Input file path is required for " << cmd << ".\n";
             printHelp(argv[0]);
             return 1;
         }
-        huffman::YOUR_INPUT_PATH = argv[2];
 
-        if (argc == 5 && std::string(argv[3]) == "-o")
-            huffman::YOUR_INPUT_DECOMPRESSED_PATH = argv[4];
-        if (argc > 5)
+        huffman::YOUR_INPUT_PATH = inputPath;
+        if (outputAssigned)
         {
-            std::cerr << "Error: Too many arguments for decompression.\n";
-            printHelp(argv[0]);
-            return 1;
+            if (cmd == "-c")
+                huffman::YOUR_INPUT_COMPRESSED_PATH = outputPath;
+            else
+                huffman::YOUR_INPUT_DECOMPRESSED_PATH = outputPath;
         }
 
-        huffman::decompressFile();
+        if (cmd == "-c")
+        {
+            huffman::compressFile();
+            std::cout << "Compress Done." << std::endl
+                      << "Default compress path: " << huffman::YOUR_INPUT_COMPRESSED_PATH << std::endl;
+            std::cout << huffman::getRatio() << std::endl;
+        }
+        else
+        {
+            huffman::decompressFile();
+            std::cout << "Decompress Done." << std::endl
+                      << "Decompress Path: " << huffman::YOUR_INPUT_DECOMPRESSED_PATH << std::endl;
+        }
     }
-    else if (option == "-r")
-        std::cout << huffman::getRatio() << std::endl;
     else
     {
-        std::cerr << "Invalid command.\n";
+        std::cerr << "Invalid command: " << cmd << "\n";
         printHelp(argv[0]);
         return 1;
     }
+
     return 0;
 }
