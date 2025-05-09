@@ -35,9 +35,9 @@ namespace huffman
 
     void writeFrequencyTable()
     {
-        std::ofstream file(DEFAULT_FREQ_TABLE_PATH, std::ios::out);
+        std::ofstream file(getFreqTablePath(), std::ios::out);
         if (!file)
-            throw std::ios_base::failure(std::string("Unable to open frequency table file for writing: ") + DEFAULT_FREQ_TABLE_PATH);
+            throw std::ios_base::failure(std::string("Unable to open frequency table file for writing: ") + getFreqTablePath().string());
 
         if (freqTable.empty())
             std::cerr << "Warning: freqTable is empty. Writing empty frequency file." << std::endl;
@@ -49,9 +49,9 @@ namespace huffman
     }
     void readFrequencyTable()
     {
-        std::ifstream file(DEFAULT_FREQ_TABLE_PATH, std::ios::in);
+        std::ifstream file(getFreqTablePath(), std::ios::in);
         if (!file)
-            throw std::ios_base::failure(std::string("Unable to open frequency table file for reading: ") + DEFAULT_FREQ_TABLE_PATH);
+            throw std::ios_base::failure(std::string("Unable to open frequency table file for reading: ") + getFreqTablePath().string());
 
         reverseFreqTable.clear();
 

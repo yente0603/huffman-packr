@@ -47,9 +47,9 @@ namespace huffman
     }
     void writeExten()
     {
-        std::ofstream file(DEFAULT_EXTEN_PATH, std::ios::out);
+        std::ofstream file(getExtenPath(), std::ios::out);
         if (!file)
-            throw std::ios_base::failure(std::string("Unable to open extension log file for writing: ") + DEFAULT_EXTEN_PATH);
+            throw std::ios_base::failure(std::string("Unable to open extension log file for writing: ") + getExtenPath().string());
 
         // Use std::filesystem for more robust path handling (requires C++17)
         // If using older C++, you'll need manual string manipulation.
@@ -68,9 +68,9 @@ namespace huffman
     }
     std::string getExten()
     {
-        std::ifstream file(DEFAULT_EXTEN_PATH, std::ios::in);
+        std::ifstream file(getExtenPath(), std::ios::in);
         if (!file)
-            throw std::ios_base::failure(std::string("Unable to open extension log file for reading: ") + DEFAULT_EXTEN_PATH);
+            throw std::ios_base::failure(std::string("Unable to open extension log file for reading: ") + getExtenPath().string());
 
         std::string extenName;
         getline(file, extenName); // Read the rest of the line to clear the buffer
@@ -79,9 +79,9 @@ namespace huffman
     }
     void writeBaseName()
     {
-        std::ofstream file(DEFAULT_BASENAME_PATH, std::ios::out);
+        std::ofstream file(getBasenamePath(), std::ios::out);
         if (!file)
-            throw std::ios_base::failure(std::string("Unable to open basename log file for writing: ") + DEFAULT_BASENAME_PATH);
+            throw std::ios_base::failure(std::string("Unable to open basename log file for writing: ") + getBasenamePath().string());
 
 #if __cplusplus >= 201703L
         std::filesystem::path p(YOUR_INPUT_PATH);
@@ -99,9 +99,9 @@ namespace huffman
     }
     std::string getBaseName()
     {
-        std::ifstream file(DEFAULT_BASENAME_PATH, std::ios::in);
+        std::ifstream file(getBasenamePath(), std::ios::in);
         if (!file)
-            throw std::ios_base::failure(std::string("Unable to open basename log file for reading: ") + DEFAULT_BASENAME_PATH);
+            throw std::ios_base::failure(std::string("Unable to open basename log file for reading: ") + getBasenamePath().string());
 
         std::string baseName;
         getline(file, baseName); // Read the rest of the line to clear the buffer
@@ -131,9 +131,9 @@ namespace huffman
 
     void writeRatio()
     {
-        std::ofstream file(DEFAULT_RATIO_PATH, std::ios::out);
+        std::ofstream file(getRatioPath(), std::ios::out);
         if (!file)
-            throw std::ios_base::failure(std::string("Unable to open ratio log file for writing: ") + DEFAULT_RATIO_PATH);
+            throw std::ios_base::failure(std::string("Unable to open ratio log file for writing: ") + getRatioPath().string());
 
         long long originalFileSize = getFileSize(YOUR_INPUT_PATH),
                   compressedFileSize = getFileSize(YOUR_INPUT_COMPRESSED_PATH);
@@ -151,9 +151,9 @@ namespace huffman
     }
     std::string getRatio()
     {
-        std::ifstream file(DEFAULT_RATIO_PATH, std::ios::in);
+        std::ifstream file(getRatioPath(), std::ios::in);
         if (!file)
-            throw std::runtime_error(std::string("Unable to open ratio log file. Has compression been performed yet? File: ") + DEFAULT_RATIO_PATH);
+            throw std::runtime_error(std::string("Unable to open ratio log file. Has compression been performed yet? File: ") + getRatioPath().string());
 
         std::string line;
         while (std::getline(file, line))
@@ -163,6 +163,6 @@ namespace huffman
                 return line;
             }
         }
-        throw std::runtime_error(std::string("Compression ratio not found in log file: ") + DEFAULT_RATIO_PATH);
+        throw std::runtime_error(std::string("Compression ratio not found in log file: ") + getRatioPath().string());
     }
 }

@@ -28,7 +28,8 @@ namespace huffman
 #if __cplusplus >= 201703L
             try
             {
-                std::filesystem::path p = std::filesystem::path("output") / (std::filesystem::path(YOUR_INPUT_PATH).stem().string() + ".huff");
+
+                std::filesystem::path p = DEFAULT_FILE_PATH / std::filesystem::path("output") / (std::filesystem::path(YOUR_INPUT_PATH).stem().string() + ".huff");
                 YOUR_INPUT_COMPRESSED_PATH = p.string();
             }
             catch (const std::filesystem::filesystem_error &e)
@@ -69,9 +70,9 @@ namespace huffman
             std::cerr << "Input file was empty. Creating empty compressed file and zero padding log." << std::endl;
             // Create empty compressed file (already done by opening)
             // Write zero padding log as 0
-            std::ofstream file(DEFAULT_ZEROPADDING_PATH, std::ios::out);
+            std::ofstream file(getZeropaddingPath(), std::ios::out);
             if (!file)
-                throw std::ios_base::failure(std::string("Unable to open zero padding log file: ") + DEFAULT_ZEROPADDING_PATH);
+                throw std::ios_base::failure(std::string("Unable to open zero padding log file: ") + getZeropaddingPath().string());
 
             file << 0; // 0 padding for empty file
             file.close();
@@ -177,9 +178,9 @@ namespace huffman
         inputFile.close();
         outputFile.close();
 
-        std::ofstream file(DEFAULT_ZEROPADDING_PATH, std::ios::out);
+        std::ofstream file(getZeropaddingPath(), std::ios::out);
         if (!file)
-            throw std::ios_base::failure(std::string("Unable to open zero padding log file for writing: ") + DEFAULT_ZEROPADDING_PATH);
+            throw std::ios_base::failure(std::string("Unable to open zero padding log file for writing: ") + getZeropaddingPath().string());
 
         file << zeroPadding;
         file.close();
@@ -191,10 +192,10 @@ namespace huffman
     {
         readFrequencyTable();
 
-        std::ifstream zeroPaddingFile(DEFAULT_ZEROPADDING_PATH);
+        std::ifstream zeroPaddingFile(getZeropaddingPath());
         int zeroPadding = 0;
         if (!zeroPaddingFile)
-            throw std::ios_base::failure(std::string("Unable to open zero padding log file for reading: ") + DEFAULT_ZEROPADDING_PATH);
+            throw std::ios_base::failure(std::string("Unable to open zero padding log file for reading: ") + getZeropaddingPath().string());
 
         zeroPaddingFile >> zeroPadding;
         zeroPaddingFile.close();
@@ -208,7 +209,7 @@ namespace huffman
             try
             {
 #if __cplusplus >= 201703L
-                std::filesystem::path p = (std::filesystem::path("output") / baseName);
+                std::filesystem::path p = DEFAULT_FILE_PATH / std::filesystem::path("output") / baseName;
                 YOUR_INPUT_DECOMPRESSED_PATH = p.string() + exten;
 #else
                     YOUR_INPUT_DECOMPRESSED_PATH = "output/" + baseName + exten;
