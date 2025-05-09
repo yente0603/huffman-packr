@@ -2,3 +2,6 @@
 .testdata/
 .DS_Store/
 bin/
+build/
+obj/
+output/
