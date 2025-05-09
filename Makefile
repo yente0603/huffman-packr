@@ -31,6 +31,6 @@ output:
 	mkdir -p output output/tmp
 
 clean:
-	rm -rf output/* obj/*.o bin/${TARGET}
+	rm -rf output obj bin
 
 .PHONY: all clean bin obj output
