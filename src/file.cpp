@@ -253,7 +253,7 @@ namespace huffman
         {
             ++bytesRead;
             int bitsToRead = 8;
-            if (bytesRead == fileSize)
+            if (bytesRead == static_cast<std::size_t>(fileSize))
             {
                 bitsToRead = 8 - zeroPadding;
                 if (bitsToRead <= 0) // after this pad are padding
